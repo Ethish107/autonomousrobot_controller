@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#007bff">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Web Bluetooth Controller</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 2rem;
+      text-align: center;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 20px;
+      margin: 6px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #status {
+      margin-top: 20px;
+      font-size: 18px;
+    }
+    #controls {
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 BLE Serial Controller</h1>
+  <button id="connectBtn">Connect to BLE Device</button>
+  <p id="status">Status: Not connected</p>
+  <p id="data"></p>
+
+  <div id="controls" style="display:none;">
+    <h2>Send Commands</h2>
+    <button onclick="sendCommand('1')">1</button>
+    <button onclick="sendCommand('2')">2</button>
+    <button onclick="sendCommand('3')">3</button><br/>
+    <button onclick="sendCommand('F')">Forward</button>
+    <button onclick="sendCommand('B')">Backward</button>
+    <button onclick="sendCommand('L')">Left</button>
+    <button onclick="sendCommand('R')">Right</button>
+  </div>
+
+  <script>
+    const connectBtn = document.getElementById("connectBtn");
+    const statusEl = document.getElementById("status");
+    const dataEl = document.getElementById("data");
+    const controls = document.getElementById("controls");
+
+    let device, server, service, rxChar, txChar;
+
+    // Nordic UART Service UUIDs (lowercase!)
+const SERVICE_UUID = "6e400001-b5a3-f393-e0a9-e50e24dcca9e";
+const RX_UUID      = "6e400003-b5a3-f393-e0a9-e50e24dcca9e"; // notify (Arduino -> browser)
+const TX_UUID      = "6e400002-b5a3-f393-e0a9-e50e24dcca9e"; // write (browser -> Arduino)
+
+
+    async function connectBLE() {
+      try {
+        statusEl.textContent = "Status: Requesting device...";
+
+        device = await navigator.bluetooth.requestDevice({
+          acceptAllDevices: true,
+          optionalServices: [SERVICE_UUID]
+        });
+
+        statusEl.textContent = `Status: Connecting to ${device.name || "Unknown"}`;
+
+        server = await device.gatt.connect();
+        service = await server.getPrimaryService(SERVICE_UUID);
+
+        // RX characteristic (notifications from Arduino)
+        rxChar = await service.getCharacteristic(RX_UUID);
+        rxChar.addEventListener("characteristicvaluechanged", handleNotifications);
+        await rxChar.startNotifications();
+
+        // TX characteristic (write to Arduino)
+        txChar = await service.getCharacteristic(TX_UUID);
+
+        statusEl.textContent = `Status: Connected to ${device.name}`;
+        controls.style.display = "block";
+      } catch (error) {
+        console.error(error);
+        statusEl.textContent = "Status: Error – " + error;
+      }
+    }
+
+    function handleNotifications(event) {
+      const value = event.target.value;
+      const decoder = new TextDecoder("utf-8");
+      const text = decoder.decode(value);
+      dataEl.textContent = `📥 Received: ${text}`;
+    }
+
+    async function sendCommand(cmd) {
+      if (!txChar) {
+        alert("Not connected to a device!");
+        return;
+      }
+      const encoder = new TextEncoder();
+      await txChar.writeValue(encoder.encode(cmd));
+      console.log("Sent:", cmd);
+    }
+
+    connectBtn.addEventListener("click", connectBLE);
+  </script>
+</body>
+</html>
