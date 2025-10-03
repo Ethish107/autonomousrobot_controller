@@ -41,16 +41,18 @@
   <p id="status">Status: Not connected</p>
   <p id="data"></p>
 
-  <div id="controls" style="display:none;">
-    <h2>Send Commands</h2>
-    <button onclick="sendCommand('1')">1</button>
-    <button onclick="sendCommand('2')">2</button>
-    <button onclick="sendCommand('3')">3</button><br/>
-    <button onclick="sendCommand('F')">Forward</button>
-    <button onclick="sendCommand('B')">Backward</button>
-    <button onclick="sendCommand('L')">Left</button>
-    <button onclick="sendCommand('R')">Right</button>
-  </div>
+ <div id="controls" style="display:none;">
+  <h2>Send Commands</h2>
+  <button onmousedown="sendCommand('1')" onmouseup="sendCommand('S')" ontouchstart="sendCommand('1')" ontouchend="sendCommand('S')">1</button>
+  <button onmousedown="sendCommand('2')" onmouseup="sendCommand('S')" ontouchstart="sendCommand('2')" ontouchend="sendCommand('S')">2</button>
+  <button onmousedown="sendCommand('3')" onmouseup="sendCommand('S')" ontouchstart="sendCommand('3')" ontouchend="sendCommand('S')">3</button><br/>
+  
+  <button onmousedown="sendCommand('F')" onmouseup="sendCommand('S')" ontouchstart="sendCommand('F')" ontouchend="sendCommand('S')">Forward</button>
+  <button onmousedown="sendCommand('B')" onmouseup="sendCommand('S')" ontouchstart="sendCommand('B')" ontouchend="sendCommand('S')">Backward</button>
+  <button onmousedown="sendCommand('L')" onmouseup="sendCommand('S')" ontouchstart="sendCommand('L')" ontouchend="sendCommand('S')">Left</button>
+  <button onmousedown="sendCommand('R')" onmouseup="sendCommand('S')" ontouchstart="sendCommand('R')" ontouchend="sendCommand('S')">Right</button>
+</div>
+
 
   <script>
     const connectBtn = document.getElementById("connectBtn");
